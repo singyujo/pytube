@@ -8,8 +8,11 @@ class Monostate:
         on_complete: Optional[Callable[[Any, Optional[str]], None]],
         title: Optional[str] = None,
         duration: Optional[int] = None,
+        author: Optional[str] = None,
     ):
         self.on_progress = on_progress
         self.on_complete = on_complete
         self.title = title
         self.duration = duration
+        self.author = author
+        self.video_id = None

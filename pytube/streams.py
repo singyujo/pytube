@@ -223,6 +223,26 @@ class Stream:
         return self._monostate.title or "Unknown YouTube Video Title"
 
     @property
+    def author(self) -> str:
+        """Get author of video
+
+        :rtype: str
+        :returns:
+            Youtube video author
+        """
+        return self._monostate.author or "UnknownAuthor"
+
+    @property
+    def video_id(self) -> str:
+        """Get id of video
+
+        :rtype: str
+        :returns:
+            Youtube video id
+        """
+        return self._monostate.video_id or "-1"
+
+    @property
     def filesize_approx(self) -> int:
         """Get approximate filesize of the video
 

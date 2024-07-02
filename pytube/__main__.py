@@ -198,6 +198,8 @@ class YouTube:
 
         self.stream_monostate.title = self.title
         self.stream_monostate.duration = self.length
+        self.stream_monostate.author = self.author
+        self.stream_monostate.video_id = self.video_id
 
         return self._fmt_streams
 
