@@ -33,7 +33,22 @@ def main():
         logger.debug(f'Pytube version: {__version__}')
 
     if not args.url or "youtu" not in args.url:
-        parser.print_help()
+        # open "download.txt" and download all videos in the file
+        # download.txt files should have one youtube url per line
+
+        # if there no url provided and no download.txt file, just print help
+        if not os.path.exists("download.txt"):
+            parser.print_help()
+        else:
+            with open("download.txt", "r") as file:
+                for line in file:
+                    args.url = line.strip()
+                    if "youtu" not in args.url:
+                        continue
+                    youtube = YouTube(args.url)
+                    ffmpeg_process(
+                        youtube=youtube, resolution=args.ffmpeg, target=args.target
+                    )
         sys.exit(1)
 
     if "/playlist" in args.url:
@@ -360,31 +375,40 @@ def _ffmpeg_downloader(
     :param Path target:
         A valid Path object
     """
+    file_name = safe_filename(f"{video_stream.title} - {video_stream.author} ({video_stream.video_id}) - {video_stream.resolution}")
     video_unique_name = _unique_name(
-        safe_filename(video_stream.title),
+        file_name,
         video_stream.subtype,
         "video",
         target=target,
     )
     audio_unique_name = _unique_name(
-        safe_filename(video_stream.title),
+        file_name,
         audio_stream.subtype,
         "audio",
         target=target,
     )
+    video_unique_name = f"{video_unique_name}.{video_stream.subtype}"
+    audio_unique_name = f"{audio_unique_name}.{audio_stream.subtype}"
+
+    video_path = os.path.join(
+        target, video_unique_name
+    )
+    audio_path = os.path.join(
+        target, audio_unique_name
+    )
+    final_path = os.path.join(
+        target, f"{file_name}.{video_stream.subtype}"
+    )
+
+    if os.path.exists(final_path):
+        print(f"Already downloaded at:\n{final_path}")
+        return
+
     _download(stream=video_stream, target=target, filename=video_unique_name)
     print("Loading audio...")
     _download(stream=audio_stream, target=target, filename=audio_unique_name)
 
-    video_path = os.path.join(
-        target, f"{video_unique_name}.{video_stream.subtype}"
-    )
-    audio_path = os.path.join(
-        target, f"{audio_unique_name}.{audio_stream.subtype}"
-    )
-    final_path = os.path.join(
-        target, f"{safe_filename(video_stream.title)}.{video_stream.subtype}"
-    )
 
     subprocess.run(  # nosec
         [
