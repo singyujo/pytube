@@ -12,6 +12,8 @@ from urllib.request import Request, urlopen
 from pytube.exceptions import RegexMatchError, MaxRetriesExceeded
 from pytube.helpers import regex_search
 
+import ssl
+
 logger = logging.getLogger(__name__)
 default_range_size = 9437184  # 9MB
 
@@ -34,7 +36,13 @@ def _execute_request(
         request = Request(url, headers=base_headers, method=method, data=data)
     else:
         raise ValueError("Invalid URL")
-    return urlopen(request, timeout=timeout)  # nosec
+    
+        # Create an SSL context to ignore certificate verification
+    context = ssl.create_default_context()
+    context.check_hostname = False
+    context.verify_mode = ssl.CERT_NONE
+
+    return urlopen(request, timeout=timeout, context=context)  # nosec
 
 
 def get(url, extra_headers=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
